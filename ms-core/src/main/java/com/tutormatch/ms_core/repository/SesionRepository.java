@@ -12,12 +12,24 @@ import java.util.UUID;
 public interface SesionRepository extends JpaRepository<Sesion, UUID> {
 
     /**
-     * Busca todas las sesiones futuras de un tutor específico.
-     * Útil para la validación de cruce de horarios y para HU-10 (Mi Agenda).
+     * HU-09/Validación: Busca sesiones ACTIVAS futuras de un tutor para detectar cruce de horarios.
      *
-     * @param tutorId ID del tutor extraído del JWT
-     * @param fecha   Momento de referencia (normalmente LocalDateTime.now())
-     * @return Lista de sesiones del tutor con fechaHora posterior a 'fecha'
+     * @param tutorId ID del tutor del JWT
+     * @param estado  Estado de la sesión (pasar "ACTIVA")
+     * @param fecha   Momento de referencia (LocalDateTime.now())
+     * @return Lista de sesiones activas futuras del tutor
      */
-    List<Sesion> findByTutorIdAndFechaHoraAfter(UUID tutorId, LocalDateTime fecha);
+    List<Sesion> findByTutorIdAndEstadoAndFechaHoraAfter(UUID tutorId, String estado, LocalDateTime fecha);
+
+    /**
+     * HU-10: Retorna las sesiones ACTIVAS futuras del tutor ordenadas cronológicamente
+     * (la más próxima primero), para mostrar en "Mi Agenda".
+     *
+     * @param tutorId ID del tutor del JWT
+     * @param estado  Estado (pasar "ACTIVA")
+     * @param fecha   Fecha de corte (LocalDateTime.now())
+     * @return Lista ordenada por fechaHora ascendente
+     */
+    List<Sesion> findByTutorIdAndEstadoAndFechaHoraAfterOrderByFechaHoraAsc(
+            UUID tutorId, String estado, LocalDateTime fecha);
 }
