@@ -33,6 +33,7 @@ public class UsuarioService {
         nuevoUsuario.setNombre(dto.getNombre());
         nuevoUsuario.setEmail(dto.getEmail());
         nuevoUsuario.setPassword(passwordEncoder.encode(dto.getPassword()));
+        nuevoUsuario.setRoles(new java.util.HashSet<>());
 
         Rol rolAlumno = rolRepository.findByNombre("ROLE_ALUMNO")
                 .orElseThrow(() -> new RuntimeException("Error crítico: El rol ALUMNO no existe en la base de datos"));

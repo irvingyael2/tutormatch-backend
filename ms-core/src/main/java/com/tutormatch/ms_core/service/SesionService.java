@@ -84,6 +84,12 @@ public class SesionService {
         return mapToResponseDto(sesionGuardada);
     }
 
+    public SesionResponseDto obtenerSesion(UUID id) {
+        Sesion sesion = sesionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Sesión no encontrada"));
+        return mapToResponseDto(sesion);
+    }
+
     /**
      * Convierte una Entity Sesion a su DTO de respuesta.
      * Método reutilizable para otros endpoints futuros (HU-10, HU-11).

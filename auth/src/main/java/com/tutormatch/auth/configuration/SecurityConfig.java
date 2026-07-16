@@ -130,6 +130,8 @@ public class SecurityConfig {
                             .collect(Collectors.toSet());
                     context.getClaims().claim("roles", roles);
                     context.getClaims().claim("usuario_id", usuarioLogueado.getId().toString());
+                    context.getClaims().claim("nombre", usuarioLogueado.getNombre());
+                    context.getClaims().claim("email", usuarioLogueado.getUsername());
                 }
 
                 // 2. ID Token: Para el frontend en Angular

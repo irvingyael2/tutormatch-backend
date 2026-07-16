@@ -49,6 +49,12 @@ public class SesionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(sesionCreada);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<SesionResponseDto> obtenerSesion(@PathVariable UUID id) {
+        SesionResponseDto sesion = sesionService.obtenerSesion(id);
+        return ResponseEntity.ok(sesion);
+    }
+
     /**
      * Manejo de errores de validación de negocio.
      * Cuando el Service lanza IllegalArgumentException, devolvemos 400 Bad Request.
