@@ -242,7 +242,25 @@ public class SesionService {
     }
 
     // =========================================================================
-    // Métodos auxiliares: Entity → DTO
+    // HU-Historial (Epica 5): Sesiones pasadas del usuario
+    // =========================================================================
+
+    /**
+     * Devuelve el historial de sesiones pasadas de un usuario (tutor o alumno).
+     *
+     * @param usuarioId UUID del usuario extraído del JWT
+     * @return          Lista de DTOs de sesiones pasadas del usuario
+     */
+    @Transactional(readOnly = true)
+    public List<SesionResponseDto> obtenerHistorial(UUID usuarioId) {
+        return sesionRepository.findHistorialByUsuarioId(usuarioId, LocalDateTime.now())
+            .stream()
+            .map(this::mapToResponseDto)
+            .collect(Collectors.toList());
+    }
+
+    // =========================================================================
+    // Métodos auxiliares: Entity -> DTO
     // =========================================================================
 
     public SesionResponseDto mapToResponseDto(Sesion sesion) {
@@ -264,7 +282,7 @@ public class SesionService {
                 sesion.getCreadoEn());
     }
 
-    private CatalogoSesionDto mapToCatalogoDto(Sesion sesion) {
+   private CatalogoSesionDto mapToCatalogoDto(Sesion sesion) {
         int inscritos = (int) inscripcionRepository
                 .countBySesionIdAndEstado(sesion.getId(), INSCRIPCION_CONFIRMADA);
 

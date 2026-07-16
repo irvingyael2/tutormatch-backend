@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -63,6 +65,9 @@ public class Sesion {
 
     @Column(name = "creado_en", updatable = false)
     private LocalDateTime creadoEn;
+
+    @OneToMany(mappedBy = "sesion", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Recurso> recursos = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

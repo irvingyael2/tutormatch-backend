@@ -120,11 +120,12 @@ public class SecurityConfig {
             Authentication principal = context.getPrincipal();
 
             // Validamos que el usuario es el que se está logueando
-            if (principal.getPrincipal() instanceof UsuarioPrincipal) {
-                UsuarioPrincipal usuarioLogueado = (UsuarioPrincipal) principal.getPrincipal();
+            if (principal.getPrincipal() instanceof UsuarioPrincipal usuarioLogueado) {
 
                 // 1. Access Token: Para los Microservicios
                 if (OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) {
+                    context.getClaims().subject(usuarioLogueado.getId().toString());
+                    
                     Set<String> roles = principal.getAuthorities().stream()
                             .map(GrantedAuthority::getAuthority)
                             .collect(Collectors.toSet());
@@ -167,7 +168,7 @@ public class SecurityConfig {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
             keyPairGenerator.initialize(2048);
             return keyPairGenerator.generateKeyPair();
-        } catch (Exception ex) {
+        } catch (java.security.NoSuchAlgorithmException ex) {
             throw new IllegalStateException(ex);
         }
     }
