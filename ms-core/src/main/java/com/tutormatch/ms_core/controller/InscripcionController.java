@@ -39,8 +39,9 @@ public class InscripcionController {
             @RequestBody InscripcionRequestDto dto,
             @AuthenticationPrincipal Jwt jwt) {
 
+        String correoAlumno = jwt.getClaimAsString("email");
         UUID alumnoId = UUID.fromString(jwt.getClaimAsString("usuario_id"));
-        Inscripcion inscripcion = inscripcionService.inscribirse(dto, alumnoId);
+        Inscripcion inscripcion = inscripcionService.inscribirse(correoAlumno, dto, alumnoId);
         return ResponseEntity.status(HttpStatus.CREATED).body(inscripcion);
     }
 
@@ -62,6 +63,16 @@ public class InscripcionController {
         return ResponseEntity.ok(inscripcionService.getAgendaAlumno(alumnoId));
     }
 
+    @GetMapping("/sesiones/{sesionId}/estado")
+    @PreAuthorize("hasRole('ROLE_ALUMNO')")
+    public ResponseEntity<Boolean> verificarInscripcion(
+            @PathVariable UUID sesionId,
+            @AuthenticationPrincipal Jwt jwt) {
+
+        UUID alumnoId = UUID.fromString(jwt.getClaimAsString("usuario_id"));
+        return ResponseEntity.ok(inscripcionService.estaInscrito(sesionId, alumnoId));
+    }
+
     // -----------------------------------------------------------------------
     // HU-16: DELETE — Cancelar inscripción
     // -----------------------------------------------------------------------
@@ -77,8 +88,9 @@ public class InscripcionController {
             @PathVariable UUID id,
             @AuthenticationPrincipal Jwt jwt) {
 
+        String correoAlumno = jwt.getClaimAsString("email");
         UUID alumnoId = UUID.fromString(jwt.getClaimAsString("usuario_id"));
-        inscripcionService.cancelarInscripcion(id, alumnoId);
+        inscripcionService.cancelarInscripcion(correoAlumno, id, alumnoId);
         return ResponseEntity.noContent().build();
     }
 

@@ -111,7 +111,7 @@ public class SecurityConfig {
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 // Redirección hacia tu frontend en Angular (ajustaremos este puerto después si
                 // es necesario)
-                .redirectUri("http://localhost:4200/app/home") // Redirección tras login
+                .redirectUri("http://localhost:4200/") // Redirección tras login
                 .postLogoutRedirectUri("http://localhost:4200/") // Redirección tras logout
                 .scope(OidcScopes.OPENID)
                 .scope(OidcScopes.PROFILE)
@@ -131,29 +131,29 @@ public class SecurityConfig {
             Authentication principal = context.getPrincipal();
 
             // Validamos que el usuario es el que se está logueando
-            if (principal.getPrincipal() instanceof UsuarioPrincipal) {
-                UsuarioPrincipal usuarioLogueado = (UsuarioPrincipal) principal.getPrincipal();
+            if (principal.getPrincipal() instanceof UsuarioPrincipal usuarioLogueado) {
 
                 // 1. Access Token: Para los Microservicios
-                if (OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) {
-                    // HU-08: en un refresh_token, Spring reutiliza el Authentication
-                    // cacheado desde el login original, así que principal.getAuthorities()
-                    // puede estar desactualizado (ej. si un Admin acaba de aprobarlo como
-                    // TUTOR). Por eso volvemos a consultar los roles ACTUALES en la BD
-                    // cada vez que se emite un access token, sea login o refresh.
-                    Set<String> roles = usuarioRepository.findById(usuarioLogueado.getId())
-                            .map(Usuario::getRoles)
-                            .orElseGet(Set::of)
-                            .stream()
-                            .map(Rol::getNombre)
-                            .collect(Collectors.toSet());
+             if (OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) {
+    context.getClaims().subject(usuarioLogueado.getId().toString());
 
-                    context.getClaims().claim("roles", roles);
-                    context.getClaims().claim("usuario_id", usuarioLogueado.getId().toString());
-                    // Nombre del usuario en el access token para que ms-core lo use
-                    // al crear sesiones (evita llamada HTTP a ms-usuarios)
-                    context.getClaims().claim("nombre", usuarioLogueado.getNombre());
-                }
+    // HU-08: en un refresh_token, Spring reutiliza el Authentication
+    // cacheado desde el login original, así que principal.getAuthorities()
+    // puede estar desactualizado (ej. si un Admin acaba de aprobarlo como
+    // TUTOR). Por eso volvemos a consultar los roles ACTUALES en la BD
+    // cada vez que se emite un access token, sea login o refresh.
+    Set<String> roles = usuarioRepository.findById(usuarioLogueado.getId())
+            .map(Usuario::getRoles)
+            .orElseGet(Set::of)
+            .stream()
+            .map(Rol::getNombre)
+            .collect(Collectors.toSet());
+
+    context.getClaims().claim("roles", roles);
+    context.getClaims().claim("usuario_id", usuarioLogueado.getId().toString());
+    context.getClaims().claim("nombre", usuarioLogueado.getNombre());
+    context.getClaims().claim("email", usuarioLogueado.getUsername());
+}
 
                 // 2. ID Token: Para el frontend en Angular
                 if (OidcParameterNames.ID_TOKEN.equals(context.getTokenType().getValue())) {
@@ -188,7 +188,7 @@ public class SecurityConfig {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
             keyPairGenerator.initialize(2048);
             return keyPairGenerator.generateKeyPair();
-        } catch (Exception ex) {
+        } catch (java.security.NoSuchAlgorithmException ex) {
             throw new IllegalStateException(ex);
         }
     }

@@ -4,7 +4,13 @@ import com.tutormatch.ms_usuarios.dto.RegistroDto;
 import com.tutormatch.ms_usuarios.dto.SolicitudPendienteDto;
 import com.tutormatch.ms_usuarios.dto.SolicitudTutorRequestDto;
 import com.tutormatch.ms_usuarios.dto.UsuarioPerfilDto;
+import com.tutormatch.ms_usuarios.entity.Usuario;
 import com.tutormatch.ms_usuarios.service.UsuarioService;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -84,4 +90,16 @@ public class UsuarioController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<Map<String, String>> obtenerUsuario(@PathVariable UUID id) {
+        Usuario usuario = service.obtenerPorId(id);
+
+        Map<String, String> response = new HashMap<>();
+
+        response.put("email", usuario.getEmail());
+        response.put("nombre", usuario.getNombre());
+
+        return ResponseEntity.ok(response);
+    }
+
 }

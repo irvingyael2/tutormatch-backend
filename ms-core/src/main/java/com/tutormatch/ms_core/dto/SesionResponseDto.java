@@ -33,4 +33,10 @@ public class SesionResponseDto {
     /** Estado lógico: ACTIVA | CANCELADA */
     private String estado;
     private LocalDateTime creadoEn;
+    
+    /** Indica si el usuario actual ya evaluó esta sesión (solo aplica para el historial del alumno) */
+    private Boolean fueEvaluada;
+    
+    /** Promedio de calificación del tutor */
+    private Double promedioTutor;
 }

@@ -7,6 +7,8 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,11 @@ public class NotificacionService {
 
     private final NotificacionRepository notificacionRepository;
     private final JavaMailSender mailSender;
+
+    // Se inyecta el mismo correo configurado en spring.mail.username,
+    // así evitamos hardcodearlo dos veces.
+    @Value("${spring.mail.username}")
+    private String remitente;
 
     // Método para obtener el historial
     public java.util.List<Notificacion> obtenerNotificacionesNoLeidas(java.util.UUID usuarioId) {
@@ -56,6 +63,7 @@ public class NotificacionService {
             MimeMessage mensaje = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mensaje, true, "UTF-8");
 
+            helper.setFrom(remitente); // <-- FIX: sin esto, Gmail rechaza el envío
             helper.setTo(destinatario);
             helper.setSubject(asunto);
 
@@ -82,7 +90,13 @@ public class NotificacionService {
             log.info("Correo enviado con éxito a: {}", destinatario);
 
         } catch (MessagingException e) {
-            log.error("Fallo catastrófico al enviar correo a {}. Error: {}", destinatario, e.getMessage());
+            // Fallos al CONSTRUIR el mensaje (adjuntos, encoding, etc.)
+            log.error("Fallo al construir el correo para {}. Error: {}", destinatario, e.getMessage());
+        } catch (MailException e) {
+            // FIX: Fallos al ENVIAR (SMTP caído, credenciales, remitente inválido, etc.)
+            // MailSendException es una RuntimeException y hereda de MailException,
+            // por eso antes se escapaba sin capturar.
+            log.error("Fallo al enviar correo (SMTP) a {}. Error: {}", destinatario, e.getMessage());
         }
     }
 }
