@@ -60,6 +60,10 @@ public class InscripcionService {
             throw new IllegalArgumentException("No puedes inscribirte a una sesión que ya pasó.");
         }
 
+        if (sesion.getTutorId().equals(alumnoId)) {
+            throw new IllegalArgumentException("No puedes inscribirte a tu propia sesión.");
+        }
+
         // 2. Buscar si ya existe un registro de inscripción (confirmada o cancelada)
         Inscripcion inscripcion = inscripcionRepository
                 .findBySesionIdAndAlumnoId(dto.getSesionId(), alumnoId)
